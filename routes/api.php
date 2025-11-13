@@ -2,7 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TicketController; // ✅ Import TicketController
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +25,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/tickets', [TicketController::class, 'store']);
     Route::get('/tickets', [TicketController::class, 'index']);
     Route::delete('/tickets/{id}', [TicketController::class, 'destroy']);
+
+    // ✅ Profile routes
+    Route::put('/user/profile', [ProfileController::class, 'updateProfile']);
+    Route::put('/user/change-password', [ProfileController::class, 'changePassword']);
+    Route::delete('/user/delete', [ProfileController::class, 'deleteAccount']);
 });
 
 // ✅ Include Laravel Breeze / Sanctum auth routes
