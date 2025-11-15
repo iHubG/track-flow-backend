@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
@@ -57,8 +58,15 @@ class ProfileController extends Controller
     public function deleteAccount(Request $request)
     {
         $user = $request->user();
-        $user->delete();
 
+        // If using session-based Sanctum, also invalidate session
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
+        // Delete the user
+        $user->delete();
         return response()->json(['message' => 'Account deleted successfully.']);
     }
 }
