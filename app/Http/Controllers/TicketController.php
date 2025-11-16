@@ -53,20 +53,31 @@ class TicketController extends Controller
 
     public function destroy(Request $request, $id)
     {
-        // ✅ Get the authenticated user
         $user = $request->user();
-
-        // ✅ Find the ticket by ID
         $ticket = Ticket::find($id);
 
-        // ✅ Check if the ticket exists and belongs to the user
-        if (!$ticket || $ticket->user_id !== $user->id) {
+        if (!$ticket) {
             return response()->json([
-                'message' => 'Ticket not found or access denied.',
+                'message' => 'Ticket not found.',
             ], 404);
         }
 
-        // ✅ Delete the ticket
+        // --- Allow admin/support to delete ANY ticket ---
+        if ($user->hasRole(['admin', 'support'])) {
+            $ticket->delete();
+
+            return response()->json([
+                'message' => 'Ticket deleted successfully.',
+            ]);
+        }
+
+        // --- Normal user: can only delete their own ticket ---
+        if ($ticket->user_id !== $user->id) {
+            return response()->json([
+                'message' => 'You are not allowed to delete this ticket.',
+            ], 403);
+        }
+
         $ticket->delete();
 
         return response()->json([
