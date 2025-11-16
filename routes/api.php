@@ -24,6 +24,8 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/tickets', [TicketController::class, 'store']);
     Route::get('/tickets', [TicketController::class, 'index']);
+    Route::get('/tickets/all', [TicketController::class, 'allTickets']);
+    Route::put('/tickets/{id}/status', [TicketController::class, 'update']);
     Route::delete('/tickets/{id}', [TicketController::class, 'destroy']);
 
     // ✅ Profile routes

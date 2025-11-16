@@ -26,6 +26,29 @@ class TicketController extends Controller
     }
 
     /**
+     * 🧾 List ALL tickets (for support/admin only).
+     */
+    public function allTickets(Request $request)
+    {
+        // ✅ Get the authenticated user
+        $user = $request->user();
+
+        // ✅ Check if user has support or admin role
+        if (!$user->hasRole(['support', 'admin'])) {
+            return response()->json([
+                'message' => 'Unauthorized to view all tickets'
+            ], 403);
+        }
+
+        // ✅ Fetch all tickets, newest first
+        $tickets = Ticket::latest()->get();
+
+        return response()->json([
+            'data' => $tickets,
+        ]);
+    }
+
+    /**
      * 📨 Create a new ticket linked to the authenticated user.
      */
     public function store(Request $request)
@@ -49,8 +72,36 @@ class TicketController extends Controller
         ], 201);
     }
 
-    // Delete a ticket function
+    // Update ticket status function
+    public function update(Request $request, $id)
+    {
+        $user = $request->user();
+        $ticket = Ticket::find($id);
 
+        if (!$ticket) {
+            return response()->json([
+                'message' => 'Ticket not found.',
+            ], 404);
+        }
+
+        // --- Allow admin/support to update ANY ticket ---
+        if ($user->hasRole(['admin', 'support'])) {
+            $validated = $request->validate([
+                'status' => 'required|in:open,in_progress,closed',
+            ]);
+            $ticket->update([
+                'status' => $validated['status'],
+            ]);
+            return response()->json([
+                'message' => 'Ticket status updated successfully.',
+                'data' => $ticket,
+            ]);
+        }
+    }
+
+
+
+    // Delete a ticket function
     public function destroy(Request $request, $id)
     {
         $user = $request->user();
