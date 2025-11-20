@@ -18,11 +18,21 @@ class AuthenticatedSessionController extends Controller
         $remember = $request->boolean('remember');
 
         if (Auth::attempt($credentials, $remember)) {
+
+            $user = Auth::user();
+
+            if ($user->status === "inactive") {
+                Auth::logout();
+                return response()->json([
+                    'message' => 'Your account is inactive. Please contact support or admin.',
+                ], 403);
+            }
+
             $request->session()->regenerate();
 
             return response()->json([
                 'message' => 'Login successful.',
-                'user' => Auth::user(),
+                'user' => $user,
             ]);
         }
 
@@ -30,6 +40,7 @@ class AuthenticatedSessionController extends Controller
             'message' => 'Invalid credentials.',
         ], 401);
     }
+
 
 
     /**
