@@ -20,10 +20,13 @@ class ManageUserController extends Controller
      */
     public function index()
     {
-        $users = User::select(['id', 'name', 'email', 'status', 'created_at', 'updated_at'])->get();
+        $users = User::select(['id', 'name', 'email', 'status', 'created_at', 'updated_at'])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return response()->json($users);
     }
+
 
     /**
      * POST /api/users
@@ -35,7 +38,6 @@ class ManageUserController extends Controller
             'name'   => 'required|string|max:255',
             'email'  => 'required|email|unique:users,email',
             'role'   => 'required|string|in:user,support,admin',
-            'status' => 'required|string|in:active,inactive',
         ]);
 
         $user = User::create([
@@ -43,12 +45,11 @@ class ManageUserController extends Controller
             'email'  => $validated['email'],
             'password' => Hash::make('password'), // Secure
             'role'   => $validated['role'],
-            'status' => $validated['status'],
         ]);
 
         $user->assignRole($validated['role']);
 
-        return response()->json($user, 201);
+        return response()->json($user->fresh(), 201);
     }
 
 
