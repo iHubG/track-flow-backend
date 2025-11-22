@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ManageUserController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +42,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/users/{id}', [ManageUserController::class, 'update']);
     Route::put('/users/{id}/status', [ManageUserController::class, 'updateStatus']);
     Route::delete('/users/{id}', [ManageUserController::class, 'destroy']);
+
+    // Notification routes
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications', [NotificationController::class, 'store']);
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
 });
 
 require __DIR__ . '/auth.php';
