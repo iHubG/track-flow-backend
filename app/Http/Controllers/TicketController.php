@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
 use App\Models\User;
-use App\Models\Notification; // your custom model
+use App\Models\Notification;
+use App\Events\NotificationCreated;
 
 class TicketController extends Controller
 {
@@ -51,15 +52,16 @@ class TicketController extends Controller
 
         $ticket = Ticket::create($validated);
 
-        // 🔔 Notify support & admin
-        $recipients = User::role(['support', 'admin'])->get();
+        $recipients = User::role(['support', 'admin'])->with('roles')->get();
         foreach ($recipients as $recipient) {
-            Notification::create([
+            $notification = Notification::create([
                 'user_id' => $recipient->id,
                 'message' => $request->user()->name . " created a new ticket.",
                 'role'    => $recipient->roles->first()->name,
                 'read'    => false,
             ]);
+
+            event(new NotificationCreated($notification));
         }
 
         return response()->json([
@@ -89,12 +91,14 @@ class TicketController extends Controller
             ]);
 
             // 🔔 Notify the ticket owner
-            Notification::create([
+            $notification = Notification::create([
                 'user_id' => $ticket->user_id,
                 'message' => $user->name . " updated your ticket status to " . $validated['status'],
                 'role'    => 'user',
                 'read'    => false,
             ]);
+
+            event(new NotificationCreated($notification));
 
             return response()->json([
                 'message' => 'Ticket status updated.',
