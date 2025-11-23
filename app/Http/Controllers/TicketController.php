@@ -33,7 +33,7 @@ class TicketController extends Controller
             ], 403);
         }
 
-        $tickets = Ticket::latest()->get();
+        $tickets = Ticket::with('user')->latest()->get();
 
         return response()->json([
             'data' => $tickets,
