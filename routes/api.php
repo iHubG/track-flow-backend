@@ -6,6 +6,7 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ManageUserController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +49,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/notifications', [NotificationController::class, 'store']);
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+
+    // Dashboard route
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 });
 
 require __DIR__ . '/auth.php';
