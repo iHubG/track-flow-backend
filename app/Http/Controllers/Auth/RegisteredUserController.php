@@ -23,7 +23,6 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // ⚠️ ADD THIS: Clear any existing session first
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -38,12 +37,13 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
-        $user->load('roles');
+        // Create API token
+        $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
             'message' => 'Registration successful.',
-            'user' => $user,
+            'user' => $user->load('roles'),
+            'token' => $token,
         ], 201);
     }
 }
