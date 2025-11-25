@@ -11,23 +11,11 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $role = $user->role;
 
-        $query = Notification::query();
-
-        if ($role === 'admin') {
-            // admin gets all notifications
-        } else {
-            $query->where(function ($q) use ($role, $user) {
-                $q->where('role', $role)
-                    ->orWhere('user_id', $user->id);
-            });
-        }
-
-        // Apply limit (example: latest 50)
-        $notifications = $query
+        // Simply get the latest 10 notifications for the authenticated user
+        $notifications = Notification::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->limit(50)
+            ->limit(10)
             ->get();
 
         return response()->json($notifications);
