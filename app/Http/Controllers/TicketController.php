@@ -42,6 +42,38 @@ class TicketController extends Controller
         ]);
     }
 
+    public function getTicketsBySupportUser(Request $request, $userId)
+    {
+        // Only support + admin can view assigned tickets
+        if (!$request->user()->hasRole(['support', 'admin'])) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 403);
+        }
+
+        // Validate that the user exists and is actually a support user
+        $supportUser = User::where('id', $userId)->whereHas('roles', function ($q) {
+            $q->where('name', 'support');
+        })->first();
+
+        if (!$supportUser) {
+            return response()->json([
+                'message' => 'Support user not found.',
+            ], 404);
+        }
+
+        // Fetch tickets assigned to this user
+        $tickets = Ticket::with(['user', 'assignedUser'])
+            ->where('assigned_to', $userId)
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'data' => $tickets,
+        ]);
+    }
+
+
     public function store(Request $request)
     {
         $validated = $request->validate([

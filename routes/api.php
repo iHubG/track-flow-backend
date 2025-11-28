@@ -29,6 +29,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/tickets', [TicketController::class, 'store']);
     Route::get('/tickets', [TicketController::class, 'index']);
     Route::get('/tickets/all', [TicketController::class, 'allTickets']);
+    Route::get('/tickets/assigned/{userId}', [TicketController::class, 'getTicketsBySupportUser']);
     Route::put('/tickets/{id}/assign', [TicketController::class, 'assign']);
     Route::put('/tickets/{id}/status', [TicketController::class, 'update']);
     Route::delete('/tickets/{id}', [TicketController::class, 'destroy']);
