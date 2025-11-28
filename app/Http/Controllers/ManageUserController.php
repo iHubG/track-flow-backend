@@ -27,6 +27,16 @@ class ManageUserController extends Controller
         return response()->json($users);
     }
 
+    public function showAllSupport()
+    {
+        $users = User::role('support')
+            ->select(['id', 'name', 'email', 'status', 'created_at', 'updated_at'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($users);
+    }
+
 
     /**
      * POST /api/users

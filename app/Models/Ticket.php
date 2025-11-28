@@ -9,26 +9,30 @@ class Ticket extends Model
 {
     use HasFactory;
 
-    // ✅ Allow mass assignment
     protected $fillable = [
-        'ticket_id',  // ✅ Added
+        'ticket_id',
         'title',
         'description',
         'priority',
         'status',
         'user_id',
+        'assigned_to',
     ];
 
-    // ✅ Default attribute values
     protected $attributes = [
         'status' => 'open',
     ];
 
-    // ✅ Relationship: each ticket belongs to a user
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+
+    public function assignedUser()
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
+    }
+
 
     /**
      * Auto-generate ticket_id when creating a new ticket

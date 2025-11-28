@@ -33,7 +33,9 @@ class TicketController extends Controller
             ], 403);
         }
 
-        $tickets = Ticket::with('user')->latest()->get();
+        $tickets = Ticket::with(['user', 'assignedUser'])
+            ->latest()
+            ->get();
 
         return response()->json([
             'data' => $tickets,
@@ -69,6 +71,49 @@ class TicketController extends Controller
             'data' => $ticket,
         ], 201);
     }
+
+    public function assign(Request $request, $id)
+    {
+        $request->validate([
+            'userId' => 'required|exists:users,id',
+        ]);
+
+        $assignedUser = User::findOrFail($request->userId);
+        $ticket = Ticket::with(['user', 'assignedUser'])->findOrFail($id);
+
+        // Update assignment
+        $ticket->assigned_to = $assignedUser->id;
+        $ticket->status = 'in_progress'; // optional: automatically move to in-progress
+        $ticket->save();
+
+        // 🔔 Notify the support user who was assigned
+        $supportNotif = Notification::create([
+            'user_id' => $assignedUser->id,
+            'message' => "You have been assigned to Ticket #{$ticket->ticket_id}",
+            'role'    => 'support',
+            'read'    => false,
+        ]);
+
+        event(new NotificationCreated($supportNotif));
+
+        // 🔔 Notify ticket owner
+        $ownerNotif = Notification::create([
+            'user_id' => $ticket->user_id,
+            'message' => "{$assignedUser->name} has been assigned to your ticket.",
+            'role'    => 'user',
+            'read'    => false,
+        ]);
+
+        event(new NotificationCreated($ownerNotif));
+
+        return response()->json([
+            'message' => 'Ticket assigned successfully.',
+            'data' => $ticket->load(['user', 'assignedUser']),
+        ]);
+    }
+
+
+
 
     public function update(Request $request, $id)
     {

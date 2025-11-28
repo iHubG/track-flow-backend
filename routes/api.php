@@ -29,6 +29,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/tickets', [TicketController::class, 'store']);
     Route::get('/tickets', [TicketController::class, 'index']);
     Route::get('/tickets/all', [TicketController::class, 'allTickets']);
+    Route::put('/tickets/{id}/assign', [TicketController::class, 'assign']);
     Route::put('/tickets/{id}/status', [TicketController::class, 'update']);
     Route::delete('/tickets/{id}', [TicketController::class, 'destroy']);
 
@@ -39,6 +40,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // User Management routes
     Route::get('/users', [ManageUserController::class, 'index']);
+    Route::get('/users/support', [ManageUserController::class, 'showAllSupport']);
     Route::post('/users', [ManageUserController::class, 'store']);
     Route::put('/users/{id}', [ManageUserController::class, 'update']);
     Route::put('/users/{id}/status', [ManageUserController::class, 'updateStatus']);
