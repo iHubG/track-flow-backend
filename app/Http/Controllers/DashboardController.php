@@ -17,6 +17,20 @@ class DashboardController extends Controller
 
             // Current data
             $totalTickets = Ticket::count();
+            $totalTicketsAssigned = Ticket::where('assigned_to', auth()->id())->count();
+            $newTicketsAssigned = Ticket::where('assigned_to', auth()->id())->whereDate('created_at', $today)->count();
+            $pendingTicketsAssigned = Ticket::where('assigned_to', auth()->id())->where('status', 'open')->count();
+            $activeTicketsAssigned = Ticket::where('assigned_to', auth()->id())
+                ->whereIn('status', ['open', 'in_progress'])
+                ->count();
+            $resolvedTicketsAssignedToday = Ticket::where('assigned_to', auth()->id())
+                ->where('status', 'closed')
+                ->whereDate('updated_at', $today)
+                ->count();
+            $totalCompletedAssigned = Ticket::where('assigned_to', auth()->id())
+                ->where('status', 'closed')
+                ->count();
+
             $totalSupport = User::role('support')->count();
             $totalUsers = User::role('user')->count();
             $newTicketsToday = Ticket::whereDate('created_at', $today)->count();
@@ -29,6 +43,28 @@ class DashboardController extends Controller
 
             // Yesterday's data for comparison
             $totalTicketsYesterday = Ticket::whereDate('created_at', '<', $today)->count();
+            $totalTicketsAssignedYesterday = Ticket::where('assigned_to', auth()->id())
+                ->whereDate('created_at', '<', $today)
+                ->count();
+            $newTicketsAssignedYesterday = Ticket::where('assigned_to', auth()->id())
+                ->whereDate('created_at', $yesterday)
+                ->count();
+            $pendingTicketsAssignedYesterday = Ticket::where('assigned_to', auth()->id())
+                ->where('status', 'open')
+                ->whereDate('created_at', '<', $today)
+                ->count();
+            $activeTicketsAssignedYesterday = Ticket::where('assigned_to', auth()->id())
+                ->whereIn('status', ['open', 'in_progress'])
+                ->whereDate('created_at', '<', $today)
+                ->count();
+            $resolvedTicketsAssignedYesterday = Ticket::where('assigned_to', auth()->id())
+                ->where('status', 'closed')
+                ->whereDate('updated_at', $yesterday)
+                ->count();
+            $totalCompletedAssignedYesterday = Ticket::where('assigned_to', auth()->id())
+                ->where('status', 'closed')
+                ->whereDate('created_at', '<', $today)
+                ->count();
             $totalSupportYesterday = User::role('support')
                 ->whereDate('created_at', '<', $today)
                 ->count();
@@ -47,6 +83,19 @@ class DashboardController extends Controller
                 // Support Dashboard
                 'total_tickets' => $totalTickets,
                 'tickets_change' => $this->calculateChange($totalTicketsYesterday, $totalTickets),
+                'total_assigned_tickets' => $totalTicketsAssigned,
+                'assigned_change_tickets' => $this->calculateChange($totalTicketsAssignedYesterday, $totalTicketsAssigned),
+                'new_assigned_tickets_today' => $newTicketsAssigned,
+                'new_assigned_change' => $this->calculateChange($newTicketsAssignedYesterday, $newTicketsAssigned),
+                'pending_assigned_tickets' => $pendingTicketsAssigned,
+                'pending_assigned_change' => $this->calculateChange($pendingTicketsAssignedYesterday, $pendingTicketsAssigned),
+                'active_assigned_tickets' => $activeTicketsAssigned,
+                'active_assigned_change' => $this->calculateChange($activeTicketsAssignedYesterday, $activeTicketsAssigned),
+                'resolved_assigned_tickets_today' => $resolvedTicketsAssignedToday,
+                'resolved_assigned_change' => $this->calculateChange($resolvedTicketsAssignedYesterday, $resolvedTicketsAssignedToday),
+                'total_completed_assigned_tickets' => $totalCompletedAssigned,
+                'total_completed_assigned_change' => $this->calculateChange($totalCompletedAssignedYesterday, $totalCompletedAssigned),
+
 
                 'pending' => Ticket::where('status', 'open')->count(),
                 'in_progress' => Ticket::where('status', 'in_progress')->count(),
